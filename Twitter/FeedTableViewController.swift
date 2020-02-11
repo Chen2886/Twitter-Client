@@ -12,9 +12,10 @@ class FeedTableViewController: UITableViewController {
 
     var tweetArr = [NSDictionary]()
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 200
         loadTweet()
 
         // Uncomment the following line to preserve selection between presentations
@@ -22,6 +23,11 @@ class FeedTableViewController: UITableViewController {
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(true)
+        self.loadTweet()
     }
     
     func loadTweet() {
@@ -52,7 +58,10 @@ class FeedTableViewController: UITableViewController {
         
         cell.name.text = (user["name"] as! String)
         cell.tweet.text = (tweetArr[indexPath.row]["text"] as! String)
+        cell.setFavorited(tweetArr[indexPath.row]["favorited"] as! Bool)
         cell.tweet.numberOfLines = 0
+        cell.tweetID = (tweetArr[indexPath.row]["id"] as! Int)
+        cell.setRT(tweetArr[indexPath.row]["retweeted"] as! Bool)
         cell.tweet.lineBreakMode = .byWordWrapping
         return cell
     }
