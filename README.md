@@ -25,7 +25,7 @@ Here's a walkthrough of implemented user stories:
 
 <img src='https://imgur.com/EShu6N5.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
---
+---
 
 # Twitter - Part II
 
