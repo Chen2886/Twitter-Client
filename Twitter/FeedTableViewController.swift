@@ -11,28 +11,45 @@ import UIKit
 class FeedTableViewController: UITableViewController {
 
     var tweetArr = [NSDictionary]()
+    let myrefresh = UIRefreshControl()
+    var numOfTweets = 200
     
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 200
-        loadTweet()
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
+        loadTweets()
+        myrefresh.addTarget(self, action: #selector(loadTweets), for: .valueChanged)
+        tableView.refreshControl = myrefresh
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
-        self.loadTweet()
+        loadTweets()
     }
     
-    func loadTweet() {
+    @objc func loadTweets() {
         let tweetURL = "https://api.twitter.com/1.1/statuses/home_timeline.json"
-        let param = ["counts": 200]
+        let param = ["counts": numOfTweets]
+        TwitterAPICaller.client?.getDictionariesRequest(url: tweetURL, parameters: param, success: { (tweets: [NSDictionary]) in
+            self.tweetArr.removeAll()
+            for tweet in tweets {
+                self.tweetArr.append(tweet)
+            }
+            print(tweets)
+            self.tableView.reloadData()
+            self.refreshControl?.endRefreshing()
+        }, failure: { (Error) in
+            print(Error.localizedDescription)
+            print("can't get tweets")
+        })
+    }
+    
+    func loadMoreTweets() {
+       let tweetURL = "https://api.twitter.com/1.1/statuses/home_timeline.json"
+        numOfTweets = numOfTweets + 200
+        let param = ["count": numOfTweets]
+        
         TwitterAPICaller.client?.getDictionariesRequest(url: tweetURL, parameters: param, success: { (tweets: [NSDictionary]) in
             self.tweetArr.removeAll()
             for tweet in tweets {
@@ -45,8 +62,13 @@ class FeedTableViewController: UITableViewController {
             print("can't get tweets")
         })
     }
-
     
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if (indexPath.row + 1 == tweetArr.count) {
+            loadMoreTweets()
+        }
+    }
+
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TweetCell", for: indexPath) as! TweetCell
         let user = tweetArr[indexPath.row]["user"] as! NSDictionary
